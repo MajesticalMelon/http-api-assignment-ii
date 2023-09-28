@@ -5,7 +5,7 @@ const getUser = (request, response) => {
 
   response.writeHead(200, { 'Content-type': 'application/json' });
   if (method.toLowerCase() === 'get') {
-    response.write(JSON.stringify(users));
+    response.write(JSON.stringify({ users }));
   }
   response.end();
 };

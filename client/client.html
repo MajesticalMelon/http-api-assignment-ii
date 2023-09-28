@@ -60,6 +60,9 @@
             case 204: 
                 status.innerText = 'Updated (No Content)';
                 break;
+            case 400: 
+                status.innerText = 'Bad Request';
+                break;
             case 404:
                 status.innerText = 'Not Found';
                 break;
@@ -73,15 +76,15 @@
             if (json.message) {
                 data.innerText = `Message: ${json.message}`;
             } else {
-                data.innerText = JSON.stringify(json);
+                data.innerText = JSON.stringify(json.users);
             }
         } else if (method.toLowerCase() === 'head') {
             data.innerText = '';
         } else if (method.toLowerCase() === 'post') {
-            if (response.status === 201) {
+            if (response.status !== 204) {
                 const json = await response.json();
                 data.innerText = `Message: ${json.message}`;
-            } else if (response.status === 204) {
+            } else {
                 data.innerText = '';
             }
         }
