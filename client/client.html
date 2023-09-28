@@ -5,7 +5,87 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    window.onload = () => {
+        const addForm = document.getElementById('nameForm');
+        const name = document.getElementById('nameField');
+        const age = document.getElementById('ageField');
 
+        addForm.onsubmit = () => {
+            sendRequest(addForm.action, addForm.method, `name=${name.value}&age=${age.value}`);
+            return false;
+        }
+
+
+        const userForm = document.getElementById('userForm');
+        const url = document.getElementById('urlField');
+        const method = document.getElementById('methodSelect');
+
+        userForm.onsubmit = () => {
+            sendRequest(url.value, method.value);
+
+            return false;
+        }
+    }
+
+    const sendRequest = async (url, method, body = '') => {
+        if (body === '') {
+            const response = await fetch(url, {
+                method: method,
+            });
+            await handleResponse(response, method);
+        } else {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json',
+                },
+                body: body
+            });
+            await handleResponse(response, method);
+        }
+    }
+
+    const handleResponse = async (response, method) => {
+        const status = document.getElementById('status');
+        const data = document.getElementById('data');
+        
+        switch (response.status) {
+            case 200: 
+                status.innerText = 'Success';
+                break;
+            case 201: 
+                status.innerText = 'Created';
+                break;
+            case 204: 
+                status.innerText = 'Updated (No Content)';
+                break;
+            case 404:
+                status.innerText = 'Not Found';
+                break;
+            default:
+                status.innerText = '';
+                break;
+        }
+
+        if (method.toLowerCase() === 'get') {
+            const json = await response.json();
+            if (json.message) {
+                data.innerText = `Message: ${json.message}`;
+            } else {
+                data.innerText = JSON.stringify(json);
+            }
+        } else if (method.toLowerCase() === 'head') {
+            data.innerText = '';
+        } else if (method.toLowerCase() === 'post') {
+            if (response.status === 201) {
+                const json = await response.json();
+                data.innerText = `Message: ${json.message}`;
+            } else if (response.status === 204) {
+                data.innerText = '';
+            }
+        }
+    }
   </script>
 </head>
 <body>
@@ -16,7 +96,7 @@
       <input id="nameField" type="text" name="name" />
       <label for="age">Age: </label>
       <input id="ageField" type="number" name="age" min="0" max="100" step="1"/>
-      <input type="submit" value="Add User" />
+      <input id="addSubmit" type="submit" value="Add User" />
     </form>
     <form id="userForm" action="/getUsers" method="get">
       <select id='urlField'>
@@ -27,10 +107,13 @@
         <option value="get">GET</option>
         <option value="head">HEAD</option>
       </select>
-      <input type="submit" value="Get User" />
+      <input id="getSubmit" type="submit" value="Get User" />
     </form>
   </section>
+  
   <section id="content">
+    <h2 id="status"></h2>
+    <p id="data"></p>
   </section>
 </body>
 </html>
